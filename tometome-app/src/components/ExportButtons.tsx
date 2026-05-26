@@ -1,9 +1,11 @@
+import { useRef, useState } from 'react';
 import type { AppInput, CalcResults } from '../types';
 import * as XLSX from 'xlsx';
 
 interface Props {
   input: AppInput;
   results: CalcResults;
+  onChange: (next: AppInput) => void;
 }
 
 function exportToExcel(input: AppInput, results: CalcResults) {
@@ -59,21 +61,63 @@ function exportToJson(input: AppInput) {
   URL.revokeObjectURL(url);
 }
 
-export default function ExportButtons({ input, results }: Props) {
+export default function ExportButtons({ input, results, onChange }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [loadMsg, setLoadMsg] = useState<string | null>(null);
+
+  function handleJsonLoad(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const loaded = JSON.parse(ev.target?.result as string) as AppInput;
+        onChange(loaded);
+        setLoadMsg('✓ 読み込み完了');
+        setTimeout(() => setLoadMsg(null), 2000);
+      } catch {
+        setLoadMsg('⚠ 読み込み失敗');
+        setTimeout(() => setLoadMsg(null), 2000);
+      }
+      // Reset input so same file can be reloaded
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsText(file);
+  }
+
   return (
-    <div className="flex gap-1">
+    <div className="flex items-center gap-1">
+      {loadMsg && (
+        <span className="text-xs text-gray-500 mr-1">{loadMsg}</span>
+      )}
       <button
         onClick={() => exportToExcel(input, results)}
         className="text-xs bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-semibold"
+        title="Excel出力（断面力・照査結果）"
       >
         📥 Excel
       </button>
       <button
         onClick={() => exportToJson(input)}
         className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded"
+        title="入力データを JSON で保存"
       >
-        JSON
+        💾 保存
       </button>
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        className="text-xs bg-gray-500 hover:bg-gray-600 text-white px-2 py-1 rounded"
+        title="JSON ファイルを読み込む"
+      >
+        📂 読込
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        className="hidden"
+        onChange={handleJsonLoad}
+      />
     </div>
   );
 }

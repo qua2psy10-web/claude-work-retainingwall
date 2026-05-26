@@ -4,6 +4,7 @@ import ExportButtons from './ExportButtons';
 interface Props {
   results: CalcResults;
   input: AppInput;
+  onChange: (next: AppInput) => void;
 }
 
 function Chip({ label, ok }: { label: string; ok: boolean }) {
@@ -18,7 +19,7 @@ function Chip({ label, ok }: { label: string; ok: boolean }) {
   );
 }
 
-export default function SummaryPanel({ results, input }: Props) {
+export default function SummaryPanel({ results, input, onChange }: Props) {
   const isSupported = input.supportType !== 'cantilever';
   return (
     <div className="flex items-center gap-2 px-3 py-2 bg-white border-b border-gray-200 flex-wrap shrink-0">
@@ -41,7 +42,7 @@ export default function SummaryPanel({ results, input }: Props) {
         {results.allOk ? 'ALL OK' : 'NG あり'}
       </span>
       <div className="ml-auto">
-        <ExportButtons input={input} results={results} />
+        <ExportButtons input={input} results={results} onChange={onChange} />
       </div>
     </div>
   );

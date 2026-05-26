@@ -98,7 +98,7 @@ function App() {
 
         {/* Right: Results */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <SummaryPanel results={results} input={input} />
+          <SummaryPanel results={results} input={input} onChange={setInput} />
           <ResultTabs input={input} results={results} />
         </div>
       </div>
