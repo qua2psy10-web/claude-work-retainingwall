@@ -121,9 +121,16 @@ export default function InputPanel({ input, onChange }: Props) {
         <Row label="支保工形式">
           <select className={selectCls} value={input.supportType} onChange={(e) => {
             const v = e.target.value as AppInput['supportType'];
-            set('supportType', v);
-            if (v === 'strut-1' && input.strutPositions.length !== 1) setStrutCount(1);
-            if (v === 'strut-multi' && input.strutPositions.length < 2) setStrutCount(2);
+            let positions = input.strutPositions;
+            if (v === 'strut-1' && input.strutPositions.length !== 1) {
+              positions = [{ depth: input.geometry.excavationDepth / 2 }];
+            } else if (v === 'strut-multi' && input.strutPositions.length < 2) {
+              positions = [
+                { depth: input.geometry.excavationDepth / 3 },
+                { depth: (input.geometry.excavationDepth * 2) / 3 },
+              ];
+            }
+            onChange({ ...input, supportType: v, strutPositions: positions });
           }}>
             <option value="cantilever">自立式（カンチレバー）</option>
             <option value="strut-1">1段切梁 / アンカー</option>
